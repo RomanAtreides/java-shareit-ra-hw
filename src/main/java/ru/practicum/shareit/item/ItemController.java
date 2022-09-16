@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService itemService;
-    private final String HEADER_NAME_CONTAINS_USER_ID = "X-Sharer-User-Id";
 
     @Autowired
     public ItemController(ItemService itemService) {
@@ -21,7 +20,7 @@ public class ItemController {
     @PostMapping
     public ItemDto create(
             @RequestBody Item item,
-            @RequestHeader(value = HEADER_NAME_CONTAINS_USER_ID, required = false) Long userId) {
+            @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId) {
         return ItemMapper.toItemDto(itemService.create(item, userId));
     }
 
@@ -31,7 +30,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> findAllUserItems(@RequestHeader(value = HEADER_NAME_CONTAINS_USER_ID, required = false) Long userId) {
+    public List<ItemDto> findAllUserItems(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId) {
         return itemService.findAllUserItems(userId).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
@@ -48,7 +47,7 @@ public class ItemController {
     public ItemDto partialUpdate(
             @RequestBody Item item,
             @PathVariable Long itemId,
-            @RequestHeader(value = HEADER_NAME_CONTAINS_USER_ID, required = false) Long userId) {
+            @RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId) {
         return ItemMapper.toItemDto(itemService.partialUpdate(item, itemId, userId));
     }
 }
