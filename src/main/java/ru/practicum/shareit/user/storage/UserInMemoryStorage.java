@@ -13,10 +13,6 @@ public class UserInMemoryStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
     private Long id = 1L;
 
-    private Long generateId() {
-        return id++;
-    }
-
     @Override
     public User create(User user) {
         user.setId(generateId());
@@ -42,5 +38,9 @@ public class UserInMemoryStorage implements UserStorage {
     @Override
     public User delete(Long userId) {
         return users.remove(userId);
+    }
+
+    private Long generateId() {
+        return id++;
     }
 }

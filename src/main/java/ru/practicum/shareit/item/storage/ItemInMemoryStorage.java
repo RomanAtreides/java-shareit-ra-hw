@@ -13,10 +13,6 @@ public class ItemInMemoryStorage implements ItemStorage {
     private final Map<Long, Item> items = new HashMap<>();
     private Long id = 1L;
 
-    private Long generateId() {
-        return id++;
-    }
-
     @Override
     public Item create(Item item) {
         item.setId(generateId());
@@ -33,11 +29,11 @@ public class ItemInMemoryStorage implements ItemStorage {
     public List<Item> findAllUserItems(Long userId) {
         List<Item> userItems = new ArrayList<>();
 
-        for (Map.Entry<Long, Item> entry : items.entrySet()) {
-            if (entry.getValue().getOwner().equals(userId)) {
-                userItems.add(entry.getValue());
-            }
-        }
+        items.values().forEach(item -> {
+                    if (item.getOwner().equals(userId)) {
+                        userItems.add(item);
+                    }
+        });
         return userItems;
     }
 
@@ -49,21 +45,25 @@ public class ItemInMemoryStorage implements ItemStorage {
             return foundItems;
         }
 
-        text = text.toLowerCase();
+        String finalText = text.toLowerCase();
 
-        for (Item item : items.values()) {
+        items.values().forEach(item -> {
             if (item.getAvailable()) {
-                if (item.getDescription().toLowerCase().contains(text)
-                        || item.getName().toLowerCase().contains(text)) {
+                if (item.getDescription().toLowerCase().contains(finalText)
+                        || item.getName().toLowerCase().contains(finalText)) {
                     foundItems.add(item);
                 }
             }
-        }
+        });
         return foundItems;
     }
 
     @Override
     public Item partialUpdate(Item item) {
         return item;
+    }
+
+    private Long generateId() {
+        return id++;
     }
 }
