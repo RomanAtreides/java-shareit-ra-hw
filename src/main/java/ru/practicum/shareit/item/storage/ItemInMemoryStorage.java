@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public class ItemInMemoryStorage implements ItemStorage {
@@ -27,35 +28,22 @@ public class ItemInMemoryStorage implements ItemStorage {
 
     @Override
     public List<Item> findAllUserItems(Long userId) {
-        List<Item> userItems = new ArrayList<>();
-
-        items.values().forEach(item -> {
-                    if (item.getOwner().equals(userId)) {
-                        userItems.add(item);
-                    }
-        });
-        return userItems;
+        return items.values().stream()
+                .filter(item -> item.getOwner().equals(userId))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Item> findByNameOrDescription(String text) {
-        List<Item> foundItems = new ArrayList<>();
-
         if (text.isBlank()) {
-            return foundItems;
+            return new ArrayList<>();
         }
 
         String finalText = text.toLowerCase();
 
-        items.values().forEach(item -> {
-            if (item.getAvailable()) {
-                if (item.getDescription().toLowerCase().contains(finalText)
-                        || item.getName().toLowerCase().contains(finalText)) {
-                    foundItems.add(item);
-                }
-            }
-        });
-        return foundItems;
+        return items.values().stream()
+                .filter(item -> checkItemContainsText(item, finalText))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -65,5 +53,12 @@ public class ItemInMemoryStorage implements ItemStorage {
 
     private Long generateId() {
         return id++;
+    }
+
+    private boolean checkItemContainsText(Item item, String text) {
+        if (item.getAvailable()) {
+            return item.getDescription().toLowerCase().contains(text) || item.getName().toLowerCase().contains(text);
+        }
+        return false;
     }
 }
