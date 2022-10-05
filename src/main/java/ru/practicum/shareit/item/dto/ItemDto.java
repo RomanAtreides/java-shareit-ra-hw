@@ -1,12 +1,25 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.Data;
+import lombok.*;
+import ru.practicum.shareit.utility.marker.Create;
 
-@Data
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class ItemDto {
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final Boolean available;
-    private final Long request;
+    private Long id;
+
+    @NotBlank(groups = {Create.class})
+    private String name;
+
+    @NotBlank(groups = {Create.class})
+    private String description;
+
+    @NotNull(groups = {Create.class})
+    private Boolean available;
 }
