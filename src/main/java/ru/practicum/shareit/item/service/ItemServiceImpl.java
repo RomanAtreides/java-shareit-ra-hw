@@ -39,7 +39,6 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto createItem(ItemDto itemDto, Long userId) {
         final User owner = UserMapper.toUser(userService.findUserById(userId));
         final Item item = ItemMapper.toItem(itemDto, owner);
-
         return ItemMapper.toItemDto(itemRepository.save(item));
     }
 
@@ -52,7 +51,6 @@ public class ItemServiceImpl implements ItemService {
         Item item = getItemIfExists(itemId);
         User user = UserMapper.toUser(userService.findUserById(userId));
         Comment comment = ItemMapper.toComment(commentShortDto, item, user);
-
         return ItemMapper.toCommentDto(commentRepository.save(comment), user);
     }
 
@@ -60,7 +58,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemInfoDto findItemById(Long itemId, Long userId) {
         Item item = getItemIfExists(itemId);
-
         return ItemMapper.toItemInfoDto(
                 item,
                 bookingRepository.findLastOwnerBooking(item.getId(), userId, LocalDateTime.now()).stream()
@@ -79,7 +76,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemInfoDto> findAllUserItems(Long userId) {
         List<Item> items = itemRepository.findItemsByOwner_IdOrderByIdAsc(userId);
-        
         return items.stream()
                 .map(item -> ItemMapper.toItemInfoDto(
                         item,
@@ -103,7 +99,6 @@ public class ItemServiceImpl implements ItemService {
         }
 
         String word = text.toLowerCase();
-
         return itemRepository.findItemsByNameOrDescription(word).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());

@@ -24,7 +24,6 @@ public class UserServiceImpl implements UserService {
     public UserDto createUser(UserDto userDto) {
         final User user = UserMapper.toUser(userDto);
         final User save = userRepository.save(user);
-
         return UserMapper.toUserDto(save);
     }
 
@@ -67,7 +66,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUser(Long userId) {
         User user = UserMapper.toUser(findUserById(userId));
-
         userRepository.delete(user);
     }
 

@@ -45,7 +45,6 @@ public class BookingServiceImpl implements BookingService {
         checkIfUserIsOwner(ownerId, bookerId, item);
 
         final Booking booking = BookingMapper.toBooking(bookingDto, item, booker);
-
         return BookingMapper.toBookingInfoDto(bookingRepository.save(booking));
     }
 
@@ -65,7 +64,6 @@ public class BookingServiceImpl implements BookingService {
 
         checkIfUserIsExists(userId);
         checkIfUserHasItems(userId, isOwner);
-
         return selectBookings(userId, status, isOwner).stream()
                 .map(BookingMapper::toBookingInfoDto)
                 .collect(Collectors.toList());
