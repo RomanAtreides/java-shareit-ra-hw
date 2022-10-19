@@ -26,8 +26,9 @@ public class ItemController {
     public ItemDto createItem(
             @Validated({Create.class}) @RequestBody ItemDto itemDto,
             @RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID, required = false) Long userId) {
-        log.info("Создание предмета {}", itemDto);
-        return itemService.createItem(itemDto, userId);
+        ItemDto newItemDto = itemService.createItem(itemDto, userId);
+        log.info("Создание предмета {}", newItemDto);
+        return newItemDto;
     }
 
     // Добавление нового комментария
@@ -36,8 +37,9 @@ public class ItemController {
             @Validated({Create.class}) @RequestBody CommentShortDto commentShortDto,
             @PathVariable Long itemId,
             @RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID, required = false) Long userId) {
-        log.info("Создание предмета {}", commentShortDto);
-        return itemService.createComment(commentShortDto, itemId, userId);
+        CommentDto newCommentDto = itemService.createComment(commentShortDto, itemId, userId);
+        log.info("Создание комментария {}", newCommentDto);
+        return newCommentDto;
     }
 
     // Просмотр информации о конкретной вещи по её идентификатору
@@ -68,7 +70,8 @@ public class ItemController {
             @PathVariable Long itemId,
             @RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID, required = false) Long userId) {
         itemDto.setId(itemId);
-        log.info("Обновление предмета {}", itemDto);
-        return itemService.updateItem(itemDto, userId);
+        ItemDto newItemDto = itemService.updateItem(itemDto, userId);
+        log.info("Обновление предмета {}", newItemDto);
+        return newItemDto;
     }
 }

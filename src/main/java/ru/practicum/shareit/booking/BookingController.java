@@ -22,8 +22,9 @@ public class BookingController {
     public BookingInfoDto createBooking(
             @RequestBody BookingDto bookingDto,
             @RequestHeader(ItemController.HEADER_NAME_CONTAINS_OWNER_ID) Long bookerId) {
-        log.info("Создание бронирования {}", bookingDto);
-        return bookingService.createBooking(bookingDto, bookerId);
+        BookingInfoDto bookingInfoDto = bookingService.createBooking(bookingDto, bookerId);
+        log.info("Создание бронирования {}", bookingInfoDto);
+        return bookingInfoDto;
     }
 
     // Получение данных о конкретном бронировании (включая его статус)
@@ -56,7 +57,7 @@ public class BookingController {
             @PathVariable Long bookingId,
             @RequestParam Boolean approved,
             @RequestHeader(ItemController.HEADER_NAME_CONTAINS_OWNER_ID) Long userId) {
-        log.info("Изменение статуса бронирования с id {}", bookingId);
+        log.info("Изменение статуса бронирования с идентификатором {}", bookingId);
         return bookingService.changeBookingStatus(approved, bookingId, userId);
     }
 }

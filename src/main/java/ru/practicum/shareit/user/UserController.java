@@ -20,8 +20,9 @@ public class UserController {
     // Добавление нового пользователя
     @PostMapping
     public UserDto createUser(@Validated({Create.class}) @RequestBody UserDto userDto) {
-        log.info("Создание пользователя {}", userDto);
-        return userService.createUser(userDto);
+        UserDto newUserDto = userService.createUser(userDto);
+        log.info("Создание пользователя {}", newUserDto);
+        return newUserDto;
     }
 
     // Получение пользователя по идентификатору
@@ -40,14 +41,15 @@ public class UserController {
     @PatchMapping("/{userId}")
     public UserDto updateUser(@RequestBody UserDto userDto, @PathVariable Long userId) {
         userDto.setId(userId);
-        log.info("Обновление пользователя {}", userDto);
-        return userService.updateUser(userDto);
+        UserDto newUserDto = userService.updateUser(userDto);
+        log.info("Обновление пользователя {}", newUserDto);
+        return newUserDto;
     }
 
     // Удаление пользователя
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable Long userId) {
-        log.info("Удаление пользователя {}", userId);
+        log.info("Удаление пользователя с идентификатором {}", userId);
         userService.deleteUser(userId);
     }
 }
