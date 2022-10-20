@@ -7,11 +7,9 @@ import javax.validation.constraints.Future;
 import javax.validation.constraints.FutureOrPresent;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class BookingInfoDto {
     private Long id;
 
@@ -27,22 +25,18 @@ public class BookingInfoDto {
 
     private ItemForBookingInfoDto item;
 
-    @Getter
-    @Setter
+    @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @ToString
     public static class UserForBookingInfoDto {
-        Long id;
+        private Long id;
     }
 
-    @Getter
-    @Setter
+    @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @ToString
     public static class ItemForBookingInfoDto {
-        Long id;
-        String name;
+        private Long id;
+        private String name;
     }
 }

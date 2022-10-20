@@ -6,11 +6,9 @@ import ru.practicum.shareit.utility.marker.Create;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Email;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class UserDto {
     private Long id;
 

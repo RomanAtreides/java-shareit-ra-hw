@@ -6,11 +6,9 @@ import ru.practicum.shareit.utility.marker.Create;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class CommentShortDto {
     private Long id;
 

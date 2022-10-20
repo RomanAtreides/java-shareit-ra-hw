@@ -6,11 +6,9 @@ import ru.practicum.shareit.utility.marker.Create;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class ItemDto {
     private Long id;
 

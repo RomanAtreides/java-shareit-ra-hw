@@ -66,7 +66,7 @@ public class ItemServiceImpl implements ItemService {
                 bookingRepository.findNextOwnerBooking(item.getId(), userId, LocalDateTime.now()).stream()
                         .max(Comparator.comparing(Booking::getStart))
                         .orElse(null),
-                commentRepository.findCommentsByItem_Id(itemId).stream()
+                commentRepository.findCommentsByItemId(itemId).stream()
                         .map(comment -> ItemMapper.toCommentDto(comment, comment.getAuthor()))
                         .collect(Collectors.toList())
         );
@@ -85,7 +85,7 @@ public class ItemServiceImpl implements ItemService {
                         bookingRepository.findNextBooking(item.getId(), LocalDateTime.now()).stream()
                                 .max(Comparator.comparing(Booking::getStart))
                                 .orElse(null),
-                        commentRepository.findCommentsByItem_Id(item.getId()).stream()
+                        commentRepository.findCommentsByItemId(item.getId()).stream()
                                 .map(comment -> ItemMapper.toCommentDto(comment, comment.getAuthor()))
                                 .collect(Collectors.toList())))
                 .collect(Collectors.toList());
