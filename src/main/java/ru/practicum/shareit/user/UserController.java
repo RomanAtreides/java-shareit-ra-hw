@@ -1,46 +1,55 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.utility.marker.Create;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping(path = "/users")
 public class UserController {
     private final UserService userService;
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
+    // Добавление нового пользователя
     @PostMapping
-    public UserDto create(@RequestBody User user) {
-        return UserMapper.toUserDto(userService.create(user));
+    public UserDto createUser(@Validated({Create.class}) @RequestBody UserDto userDto) {
+        UserDto newUserDto = userService.createUser(userDto);
+        log.info("Создание пользователя {}", newUserDto);
+        return newUserDto;
     }
 
+    // Получение пользователя по идентификатору
     @GetMapping("/{userId}")
-    public UserDto findById(@PathVariable Long userId) {
-        return UserMapper.toUserDto(userService.findById(userId));
+    public UserDto findUserById(@PathVariable Long userId) {
+        return userService.findUserById(userId);
     }
 
+    // Получение списка всех пользователей
     @GetMapping
-    public List<UserDto> findAll() {
-        return userService.findAll().stream()
-                .map(UserMapper::toUserDto)
-                .collect(Collectors.toList());
+    public List<UserDto> findAllUsers() {
+        return userService.findAllUsers();
     }
 
+    // Изменение пользователя
     @PatchMapping("/{userId}")
-    public UserDto partialUpdate(@RequestBody User user, @PathVariable Long userId) {
-        return UserMapper.toUserDto(userService.partialUpdate(user, userId));
+    public UserDto updateUser(@RequestBody UserDto userDto, @PathVariable Long userId) {
+        userDto.setId(userId);
+        UserDto newUserDto = userService.updateUser(userDto);
+        log.info("Обновление пользователя {}", newUserDto);
+        return newUserDto;
     }
 
+    // Удаление пользователя
     @DeleteMapping("/{userId}")
-    public UserDto delete(@PathVariable Long userId) {
-        return UserMapper.toUserDto(userService.delete(userId));
+    public void deleteUser(@PathVariable Long userId) {
+        log.info("Удаление пользователя с идентификатором {}", userId);
+        userService.deleteUser(userId);
     }
 }

@@ -1,54 +1,77 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentShortDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemInfoDto;
+import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.utility.marker.Create;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService itemService;
-    private static final String HEADER_NAME_CONTAINS_OWNER_ID = "X-Sharer-User-Id";
+    public static final String HEADER_NAME_CONTAINS_OWNER_ID = "X-Sharer-User-Id";
 
-    @Autowired
-    public ItemController(ItemService itemService) {
-        this.itemService = itemService;
-    }
-
+    // Добавление новой вещи
     @PostMapping
-    public ItemDto create(
-            @RequestBody Item item,
+    public ItemDto createItem(
+            @Validated({Create.class}) @RequestBody ItemDto itemDto,
             @RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID, required = false) Long userId) {
-        return ItemMapper.toItemDto(itemService.create(item, userId));
+        ItemDto newItemDto = itemService.createItem(itemDto, userId);
+        log.info("Создание предмета {}", newItemDto);
+        return newItemDto;
     }
 
-    @GetMapping("/{itemId}")
-    public ItemDto findById(@PathVariable Long itemId) {
-        return ItemMapper.toItemDto(itemService.findById(itemId));
-    }
-
-    @GetMapping
-    public List<ItemDto> findAllUserItems(@RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID, required = false) Long userId) {
-        return itemService.findAllUserItems(userId).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
-    }
-
-    @GetMapping("/search")
-    public List<ItemDto> findByNameOrDescription(@RequestParam String text) {
-        return itemService.findByNameOrDescription(text).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
-    }
-
-    @PatchMapping("/{itemId}")
-    public ItemDto partialUpdate(
-            @RequestBody Item item,
+    // Добавление нового комментария
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(
+            @Validated({Create.class}) @RequestBody CommentShortDto commentShortDto,
             @PathVariable Long itemId,
             @RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID, required = false) Long userId) {
-        return ItemMapper.toItemDto(itemService.partialUpdate(item, itemId, userId));
+        CommentDto newCommentDto = itemService.createComment(commentShortDto, itemId, userId);
+        log.info("Создание комментария {}", newCommentDto);
+        return newCommentDto;
+    }
+
+    // Просмотр информации о конкретной вещи по её идентификатору
+    @GetMapping("/{itemId}")
+    public ItemInfoDto findItemById(
+            @PathVariable Long itemId,
+            @RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID, required = false) Long userId) {
+        return itemService.findItemById(itemId, userId);
+    }
+
+    // Просмотр владельцем списка всех его вещей
+    @GetMapping
+    public List<ItemInfoDto> findAllUserItems(
+            @RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID, required = false) Long userId) {
+        return itemService.findAllUserItems(userId);
+    }
+
+    // Поиск вещи по имени или описанию
+    @GetMapping("/search")
+    public List<ItemDto> findItemsByNameOrDescription(@RequestParam String text) {
+        return itemService.findItemsByNameOrDescription(text);
+    }
+
+    // Редактирование вещи
+    @PatchMapping("/{itemId}")
+    public ItemDto updateItem(
+            @RequestBody ItemDto itemDto,
+            @PathVariable Long itemId,
+            @RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID, required = false) Long userId) {
+        itemDto.setId(itemId);
+        ItemDto newItemDto = itemService.updateItem(itemDto, userId);
+        log.info("Обновление предмета {}", newItemDto);
+        return newItemDto;
     }
 }

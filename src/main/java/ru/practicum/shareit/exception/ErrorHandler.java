@@ -12,21 +12,28 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleEntityAlreadyExistsException(final EntityAlreadyExistsException exception) {
-        log.info("500 {}", exception.getMessage());
+        log.debug("500 {}", exception.getMessage(), exception);
         return new ErrorResponse("Сущность с такими данными уже существует!", exception.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final ValidationException exception) {
-        log.info("400 {}", exception.getMessage());
-        return new ErrorResponse("Ошибка валидации!", exception.getMessage());
+        log.debug("400 {}", exception.getMessage(), exception);
+        return new ErrorResponse("Неверный запрос!", exception.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleEntityNotFoundException(final EntityNotFoundException exception) {
-        log.info("404 {}", exception.getMessage());
+        log.debug("404 {}", exception.getMessage(), exception);
         return new ErrorResponse("Сущность не найдена!", exception.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalArgumentException(final IllegalArgumentException exception) {
+        log.debug("400 {}", exception.getMessage(), exception);
+        return new ErrorResponse(exception.getMessage(), "Неверный запрос!");
     }
 }
