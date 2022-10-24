@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.*;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class ItemInfoDto extends ItemDto {
+
     private Long id;
     private String name;
     private String description;
@@ -18,6 +20,7 @@ public class ItemInfoDto extends ItemDto {
     private BookingForItemDto nextBooking;
     @ToString.Exclude
     List<CommentDto> comments;
+    private ItemRequest request;
 
     @Data
     @NoArgsConstructor

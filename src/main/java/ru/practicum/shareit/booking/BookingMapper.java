@@ -9,6 +9,7 @@ import ru.practicum.shareit.user.model.User;
 
 @Component
 public class BookingMapper {
+
     public static Booking toBooking(BookingDto bookingDto, Item item, User booker) {
         return new Booking(
                 bookingDto.getId(),

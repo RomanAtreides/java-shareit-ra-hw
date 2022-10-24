@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserRepository;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
 
     // Добавление нового пользователя
@@ -70,7 +72,12 @@ public class UserServiceImpl implements UserService {
     }
 
     private User getUserIfExists(Long userId) {
+        String exceptionMessage = "Пользователь с id " + userId + " не найден!";
+
+        if (userId == null) {
+            throw new ValidationException(exceptionMessage);
+        }
         return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id " + userId + " не найден!"));
+                .orElseThrow(() -> new EntityNotFoundException(exceptionMessage));
     }
 }

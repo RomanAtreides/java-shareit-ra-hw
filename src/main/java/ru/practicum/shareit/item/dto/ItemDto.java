@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemDto {
+
     private Long id;
 
     @NotBlank(groups = {Create.class})
@@ -20,4 +21,6 @@ public class ItemDto {
 
     @NotNull(groups = {Create.class})
     private Boolean available;
+
+    private Long requestId;
 }

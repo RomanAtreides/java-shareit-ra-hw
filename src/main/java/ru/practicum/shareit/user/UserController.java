@@ -13,8 +13,9 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping(path = "/users")
+@RequestMapping("/users")
 public class UserController {
+
     private final UserService userService;
 
     // Добавление нового пользователя
@@ -28,12 +29,14 @@ public class UserController {
     // Получение пользователя по идентификатору
     @GetMapping("/{userId}")
     public UserDto findUserById(@PathVariable Long userId) {
+        log.info("Получение данных пользователя с id={}", userId);
         return userService.findUserById(userId);
     }
 
     // Получение списка всех пользователей
     @GetMapping
     public List<UserDto> findAllUsers() {
+        log.info("Получение списка всех пользователей");
         return userService.findAllUsers();
     }
 
@@ -49,7 +52,7 @@ public class UserController {
     // Удаление пользователя
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable Long userId) {
-        log.info("Удаление пользователя с идентификатором {}", userId);
+        log.info("Удаление пользователя с id={}", userId);
         userService.deleteUser(userId);
     }
 }

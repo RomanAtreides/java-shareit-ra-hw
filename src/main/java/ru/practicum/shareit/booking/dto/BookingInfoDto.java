@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookingInfoDto {
+
     private Long id;
 
     @FutureOrPresent
