@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.request.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -8,7 +8,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.item.controller.ItemControllerTest;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.request.controller.ItemRequestController;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestShortDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
@@ -56,7 +58,7 @@ class ItemRequestControllerTest {
         when(itemRequestService.createRequest(userId, shortDto)).thenReturn(itemRequestDto);
 
         mockMvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(ItemControllerTest.HEADER_NAME_CONTAINS_USER_ID, userId)
                         .content(mapper.writeValueAsString(shortDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -74,7 +76,7 @@ class ItemRequestControllerTest {
         when(itemRequestService.findUserRequests(userId)).thenReturn(requestDtoRegister);
 
         mockMvc.perform(get("/requests")
-                        .header("X-Sharer-User-Id", userId))
+                        .header(ItemControllerTest.HEADER_NAME_CONTAINS_USER_ID, userId))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(requestDtoRegister)));
 
@@ -86,7 +88,7 @@ class ItemRequestControllerTest {
         when(itemRequestService.findAllRequests(0, 10, userId)).thenReturn(requestDtoRegister);
 
         mockMvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(ItemControllerTest.HEADER_NAME_CONTAINS_USER_ID, userId)
                         .param("from", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
@@ -102,7 +104,7 @@ class ItemRequestControllerTest {
         when(itemRequestService.findRequestById(requestId, userId)).thenReturn(itemRequestDto);
 
         mockMvc.perform(get("/requests/{requestId}", requestId)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(ItemControllerTest.HEADER_NAME_CONTAINS_USER_ID, userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(itemRequestDto.getId()))
                 .andExpect(jsonPath("$.description").value(itemRequestDto.getDescription()))

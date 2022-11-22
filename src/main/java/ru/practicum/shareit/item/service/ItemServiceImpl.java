@@ -4,21 +4,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.CommentRepository;
 import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentShortDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemInfoDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.ItemRequestRepository;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
@@ -72,12 +72,12 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toItemInfoDto(
                 item,
                 bookingRepository.findLastOwnerBooking(
-                        item.getId(), userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+                                item.getId(), userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
                         ).stream()
                         .min(Comparator.comparing(Booking::getEnd))
                         .orElse(null),
                 bookingRepository.findNextOwnerBooking(
-                        item.getId(), userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+                                item.getId(), userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
                         ).stream()
                         .max(Comparator.comparing(Booking::getStart))
                         .orElse(null),
@@ -97,12 +97,12 @@ public class ItemServiceImpl implements ItemService {
                 .map(item -> ItemMapper.toItemInfoDto(
                         item,
                         bookingRepository.findLastBooking(
-                                item.getId(), LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+                                        item.getId(), LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
                                 ).stream()
                                 .min(Comparator.comparing(Booking::getEnd))
                                 .orElse(null),
                         bookingRepository.findNextBooking(
-                                item.getId(), LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+                                        item.getId(), LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
                                 ).stream()
                                 .max(Comparator.comparing(Booking::getStart))
                                 .orElse(null),

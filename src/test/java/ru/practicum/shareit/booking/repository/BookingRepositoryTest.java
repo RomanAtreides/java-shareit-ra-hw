@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.repository;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -6,13 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Pageable;
+import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.ItemRequestRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -329,13 +330,13 @@ class BookingRepositoryTest {
     }
 
     private Item createItem(String name, String description, Boolean available, User owner, ItemRequest request) {
-        Item item = new Item();
-        item.setName(name);
-        item.setDescription(description);
-        item.setAvailable(available);
-        item.setOwner(owner);
-        item.setRequest(request);
-        return itemRepository.save(item);
+        return itemRepository.save(Item.builder()
+                .name(name)
+                .description(description)
+                .available(available)
+                .owner(owner)
+                .request(request)
+                .build());
     }
 
     private Booking createBooking(
@@ -344,12 +345,12 @@ class BookingRepositoryTest {
             Item item,
             User booker,
             BookingStatus status) {
-        Booking booking = new Booking();
-        booking.setStart(start);
-        booking.setEnd(end);
-        booking.setItem(item);
-        booking.setBooker(booker);
-        booking.setStatus(status);
-        return bookingRepository.save(booking);
+        return bookingRepository.save(Booking.builder()
+                .start(start)
+                .end(end)
+                .item(item)
+                .booker(booker)
+                .status(status)
+                .build());
     }
 }

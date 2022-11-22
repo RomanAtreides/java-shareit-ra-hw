@@ -6,11 +6,12 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class ItemInfoDto extends ItemDto {
+public class ItemInfoDto { //extends ItemDto {
 
     private Long id;
     private String name;
@@ -19,7 +20,7 @@ public class ItemInfoDto extends ItemDto {
     private BookingForItemDto lastBooking;
     private BookingForItemDto nextBooking;
     @ToString.Exclude
-    List<CommentDto> comments;
+    private List<CommentDto> comments;
     private ItemRequest request;
 
     @Data

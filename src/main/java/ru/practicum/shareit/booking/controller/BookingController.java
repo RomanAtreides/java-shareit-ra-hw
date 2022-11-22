@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInfoDto;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.item.ItemController;
+import ru.practicum.shareit.item.controller.ItemController;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -43,22 +43,22 @@ public class BookingController {
     @GetMapping
     public List<BookingInfoDto> findUserBookings(
             @RequestHeader(ItemController.HEADER_NAME_CONTAINS_OWNER_ID) Long userId,
-            @RequestParam(name = "state", defaultValue = "ALL") String stateParam,
-            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "ALL") String state,
+            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("Просмотр списка бронирований пользователем с id={}", userId);
-        return bookingService.findUserBookings(userId, stateParam, from, size, false);
+        return bookingService.findUserBookings(userId, state, from, size, false);
     }
 
     // Получение списка бронирований для всех вещей текущего пользователя
     @GetMapping("/owner")
     List<BookingInfoDto> findBookingsForOwner(
             @RequestHeader(ItemController.HEADER_NAME_CONTAINS_OWNER_ID) Long userId,
-            @RequestParam(name = "state", defaultValue = "ALL") String stateParam,
-            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "ALL") String state,
+            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("Просмотр пользователем с id={} списка своих бронирований", userId);
-        return bookingService.findUserBookings(userId, stateParam, from, size, true);
+        return bookingService.findUserBookings(userId, state, from, size, true);
     }
 
     // Подтверждение или отклонение запроса на бронирование

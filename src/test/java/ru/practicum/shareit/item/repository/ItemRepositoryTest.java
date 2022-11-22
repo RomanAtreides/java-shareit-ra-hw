@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.repository;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -106,12 +106,13 @@ class ItemRepositoryTest {
     }
 
     private Item createItem(String name, String description, boolean available, User owner, ItemRequest request) {
-        Item item = new Item();
-        item.setName(name);
-        item.setDescription(description);
-        item.setAvailable(available);
-        item.setOwner(owner);
-        item.setRequest(request);
+        Item item = Item.builder()
+                .name(name)
+                .description(description)
+                .available(available)
+                .owner(owner)
+                .request(request)
+                .build();
         return itemRepository.save(item);
     }
 

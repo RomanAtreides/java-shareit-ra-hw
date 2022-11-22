@@ -6,6 +6,7 @@ import ru.practicum.shareit.utility.marker.Create;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

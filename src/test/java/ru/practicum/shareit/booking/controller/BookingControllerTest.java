@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -8,9 +8,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInfoDto;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.item.controller.ItemControllerTest;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -33,14 +35,14 @@ class BookingControllerTest {
             LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).plusDays(2L),
             1L
     );
-    private final BookingInfoDto bookingInfoDto = new BookingInfoDto(
-            bookingDto.getId(),
-            bookingDto.getStart(),
-            bookingDto.getEnd(),
-            BookingStatus.WAITING,
-            new BookingInfoDto.UserForBookingInfoDto(1L),
-            new BookingInfoDto.ItemForBookingInfoDto(1L, "itemOne")
-    );
+    private final BookingInfoDto bookingInfoDto = BookingInfoDto.builder()
+            .id(bookingDto.getId())
+            .start(bookingDto.getStart())
+            .end(bookingDto.getEnd())
+            .status(BookingStatus.WAITING)
+            .booker(new BookingInfoDto.UserForBookingInfoDto(1L))
+            .item(new BookingInfoDto.ItemForBookingInfoDto(1L, "itemOne"))
+            .build();
 
     @Autowired
     private ObjectMapper mapper;
@@ -56,7 +58,7 @@ class BookingControllerTest {
         when(bookingService.createBooking(any(BookingDto.class), any())).thenReturn(bookingInfoDto);
 
         mockMvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(ItemControllerTest.HEADER_NAME_CONTAINS_USER_ID, userId)
                         .content(mapper.writeValueAsString(bookingDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -76,7 +78,7 @@ class BookingControllerTest {
         when(bookingService.findBookingById(anyLong(), any())).thenReturn(bookingInfoDto);
 
         mockMvc.perform(get("/bookings/{bookingId}", 1L)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(ItemControllerTest.HEADER_NAME_CONTAINS_USER_ID, userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(bookingInfoDto.getId()))
                 .andExpect(jsonPath("$.start").value(bookingInfoDto.getStart().toString()))
@@ -96,7 +98,7 @@ class BookingControllerTest {
                 .thenReturn(bookingInfoDtoRegister);
 
         mockMvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", userId))
+                        .header(ItemControllerTest.HEADER_NAME_CONTAINS_USER_ID, userId))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(bookingInfoDtoRegister)));
 
@@ -112,7 +114,7 @@ class BookingControllerTest {
                 .thenReturn(bookingInfoDtoRegister);
 
         mockMvc.perform(get("/bookings/owner")
-                        .header("X-Sharer-User-Id", userId))
+                        .header(ItemControllerTest.HEADER_NAME_CONTAINS_USER_ID, userId))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(bookingInfoDtoRegister)));
 
@@ -132,7 +134,7 @@ class BookingControllerTest {
                 .thenReturn(bookingInfoDto);
 
         mockMvc.perform(patch("/bookings/{bookingId}", bookingId)
-                        .header("X-Sharer-User-Id", userId)
+                        .header(ItemControllerTest.HEADER_NAME_CONTAINS_USER_ID, userId)
                         .param("approved", "true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(bookingInfoDto.getId()))

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,8 +31,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ItemController.class)
 @AutoConfigureMockMvc
-class ItemControllerTest {
+public class ItemControllerTest {
 
+    public static final String HEADER_NAME_CONTAINS_USER_ID = "X-Sharer-User-Id";
     private final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
     private final Long userId = 1L;
@@ -95,7 +96,7 @@ class ItemControllerTest {
         when(itemService.findItemById(anyLong(), any())).thenReturn(infoDto);
 
         mockMvc.perform(get("/items/{itemId}", 1L)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(HEADER_NAME_CONTAINS_USER_ID, userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(infoDto.getId()))
                 .andExpect(jsonPath("$.name").value(infoDto.getName()))
@@ -116,7 +117,7 @@ class ItemControllerTest {
         when(itemService.findAllUserItems(eq(userId), anyInt(), anyInt())).thenReturn(itemInfoDtoRegister);
 
         mockMvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", userId))
+                        .header(HEADER_NAME_CONTAINS_USER_ID, userId))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(itemInfoDtoRegister)));
 
@@ -131,7 +132,7 @@ class ItemControllerTest {
         when(itemService.findItemsByNameOrDescription(eq(text), anyInt(), anyInt())).thenReturn(itemDtoRegister);
 
         mockMvc.perform(get("/items/search")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(HEADER_NAME_CONTAINS_USER_ID, userId)
                         .param("text", text))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(itemDtoRegister)));
@@ -145,7 +146,7 @@ class ItemControllerTest {
         when(itemService.updateItem(itemDto, userId)).thenReturn(itemDtoTwo);
 
         mockMvc.perform(patch("/items/{itemId}", 1L)
-                        .header("X-Sharer-User-Id", userId)
+                        .header(HEADER_NAME_CONTAINS_USER_ID, userId)
                         .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -167,24 +168,24 @@ class ItemControllerTest {
                 LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         );
 
-        return new ItemInfoDto(
-                1L,
-                "itemOne",
-                "itemOne description",
-                true,
-                null,
-                null,
-                List.of(new CommentDto(
+        return ItemInfoDto.builder()
+                .id(1L)
+                .name("itemOne")
+                .description("itemOne description")
+                .available(true)
+                .lastBooking(null)
+                .nextBooking(null)
+                .comments(List.of(new CommentDto(
                         1L, "text", "author", LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
-                )),
-                request
-        );
+                )))
+                .request(request)
+                .build();
     }
 
     private MockHttpServletRequestBuilder postJson(String uri, Object body) {
         try {
             return post(uri)
-                    .header("X-Sharer-User-Id", userId)
+                    .header(HEADER_NAME_CONTAINS_USER_ID, userId)
                     .content(mapper.writeValueAsString(body))
                     .characterEncoding(StandardCharsets.UTF_8)
                     .contentType(MediaType.APPLICATION_JSON);

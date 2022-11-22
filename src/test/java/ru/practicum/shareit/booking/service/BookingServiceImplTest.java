@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInfoDto;
@@ -607,23 +607,25 @@ class BookingServiceImplTest {
     }
 
     private Item makeItem(String name, String description, Boolean available, User owner, ItemRequest request) {
-        Item item = new Item();
-        item.setName(name);
-        item.setDescription(description);
-        item.setAvailable(available);
-        item.setOwner(owner);
-        item.setRequest(request);
+        Item item = Item.builder()
+                .name(name)
+                .description(description)
+                .available(available)
+                .owner(owner)
+                .request(request)
+                .build();
         em.persist(item);
         return item;
     }
 
     private Booking makeBooking(LocalDateTime start, LocalDateTime end, Item item, User booker, BookingStatus status) {
-        Booking booking = new Booking();
-        booking.setStart(start);
-        booking.setEnd(end);
-        booking.setItem(item);
-        booking.setBooker(booker);
-        booking.setStatus(status);
+        Booking booking = Booking.builder()
+                .start(start)
+                .end(end)
+                .item(item)
+                .booker(booker)
+                .status(status)
+                .build();
         em.persist(booking);
         return booking;
     }

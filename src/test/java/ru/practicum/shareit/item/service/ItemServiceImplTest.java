@@ -7,21 +7,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.CommentRepository;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentShortDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemInfoDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.ItemRequestRepository;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
@@ -395,23 +395,25 @@ class ItemServiceImplTest {
     }
 
     private Item makeItem(String name, String description, Boolean available, User owner, ItemRequest request) {
-        Item item = new Item();
-        item.setName(name);
-        item.setDescription(description);
-        item.setAvailable(available);
-        item.setOwner(owner);
-        item.setRequest(request);
+        Item item = Item.builder()
+                .name(name)
+                .description(description)
+                .available(available)
+                .owner(owner)
+                .request(request)
+                .build();
         em.persist(item);
         return item;
     }
 
     private Booking makeBooking(LocalDateTime start, LocalDateTime end, Item item, User booker, BookingStatus status) {
-        Booking booking = new Booking();
-        booking.setStart(start);
-        booking.setEnd(end);
-        booking.setItem(item);
-        booking.setBooker(booker);
-        booking.setStatus(status);
+        Booking booking = Booking.builder()
+                .start(start)
+                .end(end)
+                .item(item)
+                .booker(booker)
+                .status(status)
+                .build();
         em.persist(booking);
         return booking;
     }

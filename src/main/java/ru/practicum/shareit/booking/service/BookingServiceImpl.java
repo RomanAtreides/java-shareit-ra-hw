@@ -5,11 +5,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingMapper;
-import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInfoDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemMapper;
@@ -45,7 +45,7 @@ public class BookingServiceImpl implements BookingService {
         Long ownerId = owner.getId();
         ItemInfoDto itemInfoDto = itemService.findItemById(itemId, ownerId);
         ItemRequest request = itemInfoDto.getRequest();
-        final Item item = ItemMapper.toItem(itemInfoDto, owner, request);
+        final Item item = ItemMapper.toItemFromInfoDto(itemInfoDto, owner, request);
 
         checkIfItemIsAvailable(item);
         checkIfDatesAreValid(bookingDto);
@@ -92,12 +92,7 @@ public class BookingServiceImpl implements BookingService {
 
         checkIfUserIsOwner(booking, bookingId, userId);
         checkIfBookingIsAlreadyApproved(booking, bookingId);
-
-        if (approved) {
-            booking.setStatus(BookingStatus.APPROVED);
-        } else {
-            booking.setStatus(BookingStatus.REJECTED);
-        }
+        booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
         return BookingMapper.toBookingInfoDto(bookingRepository.save(booking));
     }
 
@@ -106,54 +101,38 @@ public class BookingServiceImpl implements BookingService {
 
         switch (status) {
             case FUTURE:
-                if (isOwner) {
-                    bookings = bookingRepository.findOwnerBookingsWithStartIsAfter(
-                                    userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable
-                    );
-                } else {
-                    bookings = bookingRepository.findUserBookingsWithStartIsAfter(
-                                    userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable
-                    );
-                }
+                bookings = isOwner ?
+                        bookingRepository.findOwnerBookingsWithStartIsAfter(
+                                userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable) :
+                        bookingRepository.findUserBookingsWithStartIsAfter(
+                                userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable);
                 break;
             case CURRENT:
-                if (isOwner) {
-                    bookings = bookingRepository.findCurrentOwnerBookings(
-                            userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable
-                    );
-                } else {
-                    bookings = bookingRepository.findCurrentUserBookings(
-                            userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable
-                    );
-                }
+                bookings = isOwner ?
+                        bookingRepository.findCurrentOwnerBookings(
+                                userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable) :
+                        bookingRepository.findCurrentUserBookings(
+                                userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable);
                 break;
             case PAST:
-                if (isOwner) {
-                    bookings = bookingRepository.findOwnerBookingsWithEndIsBefore(
-                            userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable
-                    );
-                } else {
-                    bookings = bookingRepository.findUserBookingsWithEndIsBefore(
-                            userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable
-                    );
-                }
+                bookings = isOwner ?
+                        bookingRepository.findOwnerBookingsWithEndIsBefore(
+                                userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable) :
+                        bookingRepository.findUserBookingsWithEndIsBefore(
+                                userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable);
                 break;
             case WAITING:
             case APPROVED:
             case REJECTED:
             case CANCELED:
-                if (isOwner) {
-                    bookings = bookingRepository.findOwnerBookingsByState(userId, status, pageable);
-                } else {
-                    bookings = bookingRepository.findUserBookingsByState(userId, status, pageable);
-                }
+                bookings = isOwner ?
+                        bookingRepository.findOwnerBookingsByState(userId, status, pageable) :
+                        bookingRepository.findUserBookingsByState(userId, status, pageable);
                 break;
             default:
-                if (isOwner) {
-                    bookings = bookingRepository.findOwnerBookings(userId, pageable);
-                } else {
-                    bookings = bookingRepository.findUserBookings(userId, pageable);
-                }
+                bookings = isOwner ?
+                        bookingRepository.findOwnerBookings(userId, pageable) :
+                        bookingRepository.findUserBookings(userId, pageable);
                 break;
         }
         return bookings;

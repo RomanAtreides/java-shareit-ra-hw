@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.request.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,7 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
-import static ru.practicum.shareit.item.ItemController.HEADER_NAME_CONTAINS_OWNER_ID;
+import static ru.practicum.shareit.item.controller.ItemController.HEADER_NAME_CONTAINS_OWNER_ID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -44,15 +44,15 @@ public class ItemRequestController {
     // Получение списка запросов, созданных другими пользователями
     @GetMapping("/all")
     public List<ItemRequestDto> findAllRequests(
-            @PositiveOrZero @RequestParam (name = "from", defaultValue = "0") Integer from,
-            @Positive @RequestParam (name = "size", defaultValue = "10") Integer size,
+            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+            @Positive @RequestParam(defaultValue = "10") Integer size,
             @RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID) Long userId) {
         log.info("Получение списка запросов других пользователей");
         return itemRequestService.findAllRequests(from, size, userId);
     }
 
     // Получение данных об одном конкретном запросе вместе с данными об ответах на него
-    @GetMapping ("/{requestId}")
+    @GetMapping("/{requestId}")
     public ItemRequestDto findRequestById(
             @PathVariable Long requestId,
             @RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID) Long userId) {
