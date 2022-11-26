@@ -6,10 +6,12 @@ import ru.practicum.shareit.utility.marker.Create;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemDto {
+
     private Long id;
 
     @NotBlank(groups = {Create.class})
@@ -20,4 +22,6 @@ public class ItemDto {
 
     @NotNull(groups = {Create.class})
     private Boolean available;
+
+    private Long requestId;
 }

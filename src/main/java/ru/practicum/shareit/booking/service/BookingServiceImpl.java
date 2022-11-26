@@ -1,24 +1,29 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
-import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInfoDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.dto.ItemInfoDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.utility.FromSizeRequest;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +31,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
+
     private final BookingRepository bookingRepository;
     private final UserService userService;
     private final ItemService itemService;
@@ -37,14 +43,17 @@ public class BookingServiceImpl implements BookingService {
         Long itemId = bookingDto.getItemId();
         User owner = itemService.findOwnerByItemId(itemId);
         Long ownerId = owner.getId();
-        final Item item = ItemMapper.toItem(itemService.findItemById(itemId, ownerId), owner);
-        final User booker = UserMapper.toUser(userService.findUserById(bookerId));
+        ItemInfoDto itemInfoDto = itemService.findItemById(itemId, ownerId);
+        ItemRequest request = itemInfoDto.getRequest();
+        final Item item = ItemMapper.toItemFromInfoDto(itemInfoDto, owner, request);
 
         checkIfItemIsAvailable(item);
         checkIfDatesAreValid(bookingDto);
         checkIfUserIsOwner(ownerId, bookerId, item);
 
+        final User booker = UserMapper.toUser(userService.findUserById(bookerId));
         final Booking booking = BookingMapper.toBooking(bookingDto, item, booker);
+
         return BookingMapper.toBookingInfoDto(bookingRepository.save(booking));
     }
 
@@ -59,12 +68,18 @@ public class BookingServiceImpl implements BookingService {
 
     // Получение списка всех бронирований текущего пользователя
     @Override
-    public List<BookingInfoDto> findUserBookings(Long userId, String stateParam, boolean isOwner) {
+    public List<BookingInfoDto> findUserBookings(
+            Long userId,
+            String stateParam,
+            Integer from,
+            Integer size,
+            boolean isOwner) {
+        Pageable pageable = FromSizeRequest.of(from, size);
         BookingStatus status = checkBookingStatus(stateParam);
 
         checkIfUserIsExists(userId);
-        checkIfUserHasItems(userId, isOwner);
-        return selectBookings(userId, status, isOwner).stream()
+        checkIfUserHasItems(userId);
+        return selectBookings(userId, status, pageable, isOwner).stream()
                 .map(BookingMapper::toBookingInfoDto)
                 .collect(Collectors.toList());
     }
@@ -77,56 +92,47 @@ public class BookingServiceImpl implements BookingService {
 
         checkIfUserIsOwner(booking, bookingId, userId);
         checkIfBookingIsAlreadyApproved(booking, bookingId);
-
-        if (approved) {
-            booking.setStatus(BookingStatus.APPROVED);
-        } else {
-            booking.setStatus(BookingStatus.REJECTED);
-        }
+        booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
         return BookingMapper.toBookingInfoDto(bookingRepository.save(booking));
     }
 
-    private List<Booking> selectBookings(Long userId, BookingStatus status, boolean isOwner) {
+    private List<Booking> selectBookings(Long userId, BookingStatus status, Pageable pageable, boolean isOwner) {
         List<Booking> bookings;
 
         switch (status) {
             case FUTURE:
-                if (isOwner) {
-                    bookings = bookingRepository.findOwnerBookingsWithStartIsAfter(userId, LocalDateTime.now());
-                } else {
-                    bookings = bookingRepository.findUserBookingsWithStartIsAfter(userId, LocalDateTime.now());
-                }
+                bookings = isOwner ?
+                        bookingRepository.findOwnerBookingsWithStartIsAfter(
+                                userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable) :
+                        bookingRepository.findUserBookingsWithStartIsAfter(
+                                userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable);
                 break;
             case CURRENT:
-                if (isOwner) {
-                    bookings = bookingRepository.findCurrentOwnerBookings(userId, LocalDateTime.now());
-                } else {
-                    bookings = bookingRepository.findCurrentUserBookings(userId, LocalDateTime.now());
-                }
+                bookings = isOwner ?
+                        bookingRepository.findCurrentOwnerBookings(
+                                userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable) :
+                        bookingRepository.findCurrentUserBookings(
+                                userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable);
                 break;
             case PAST:
-                if (isOwner) {
-                    bookings = bookingRepository.findOwnerBookingsWithEndIsBefore(userId, LocalDateTime.now());
-                } else {
-                    bookings = bookingRepository.findUserBookingsWithEndIsBefore(userId, LocalDateTime.now());
-                }
+                bookings = isOwner ?
+                        bookingRepository.findOwnerBookingsWithEndIsBefore(
+                                userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable) :
+                        bookingRepository.findUserBookingsWithEndIsBefore(
+                                userId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), pageable);
                 break;
             case WAITING:
             case APPROVED:
             case REJECTED:
             case CANCELED:
-                if (isOwner) {
-                    bookings = bookingRepository.findOwnerBookingsByState(userId, status);
-                } else {
-                    bookings = bookingRepository.findUserBookingsByState(userId, status);
-                }
+                bookings = isOwner ?
+                        bookingRepository.findOwnerBookingsByState(userId, status, pageable) :
+                        bookingRepository.findUserBookingsByState(userId, status, pageable);
                 break;
             default:
-                if (isOwner) {
-                    bookings = bookingRepository.findOwnerBookings(userId);
-                } else {
-                    bookings = bookingRepository.findUserBookings(userId);
-                }
+                bookings = isOwner ?
+                        bookingRepository.findOwnerBookings(userId, pageable) :
+                        bookingRepository.findUserBookings(userId, pageable);
                 break;
         }
         return bookings;
@@ -141,7 +147,7 @@ public class BookingServiceImpl implements BookingService {
     private void checkIfDatesAreValid(BookingDto bookingDto) {
         LocalDateTime start = bookingDto.getStart();
         LocalDateTime end = bookingDto.getEnd();
-        boolean isValid = start.isAfter(LocalDateTime.now()) && start.isBefore(end);
+        boolean isValid = start.isAfter(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)) && start.isBefore(end);
 
         if (!isValid) {
             throw new ValidationException("Даты указаны неверно!");
@@ -155,8 +161,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private Booking getBookingIfExists(Long bookingId) {
+        String exceptionMessage = "Бронирование с id " + bookingId + " не найдено!";
+
+        if (bookingId == null) {
+            throw new ValidationException(exceptionMessage);
+        }
         return bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new EntityNotFoundException("Бронирование с id " + bookingId + " не найдено!"));
+                .orElseThrow(() -> new EntityNotFoundException(exceptionMessage));
     }
 
     // Метод проверяет, что информацию о бронировании пытается получить или автор бронирования, или владелец вещи
@@ -179,13 +190,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void checkIfUserIsExists(Long userId) {
-        if (userService.findUserById(userId) == null) {
-            throw new EntityNotFoundException("Пользователь с id " + userId + " не найден!");
-        }
+        userService.findUserById(userId);
     }
 
-    private void checkIfUserHasItems(Long userId, boolean isOwner) {
-        if (isOwner && itemService.findAllUserItems(userId).size() == 0) {
+    private void checkIfUserHasItems(Long userId) {
+        if (itemService.findCountOfUserItems(userId) == 0) {
             throw new EntityNotFoundException("У пользователя " + userId + " нет вещей!");
         }
     }

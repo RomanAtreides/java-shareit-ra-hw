@@ -7,10 +7,12 @@ import javax.validation.constraints.Future;
 import javax.validation.constraints.FutureOrPresent;
 import java.time.LocalDateTime;
 
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookingInfoDto {
+
     private Long id;
 
     @FutureOrPresent

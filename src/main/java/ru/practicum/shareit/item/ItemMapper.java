@@ -8,39 +8,54 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemInfoDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
 @Component
 public class ItemMapper {
-    public static Item toItem(ItemDto dto, User owner) {
-        return new Item(
-                dto.getId(),
-                dto.getName(),
-                dto.getDescription(),
-                dto.getAvailable(),
-                owner
-        );
+
+    public static Item toItem(ItemDto itemDto, User owner, ItemRequest itemRequest) {
+        return Item.builder()
+                .id(itemDto.getId())
+                .name(itemDto.getName())
+                .description(itemDto.getDescription())
+                .available(itemDto.getAvailable())
+                .owner(owner)
+                .request(itemRequest)
+                .build();
+    }
+
+    public static Item toItemFromInfoDto(ItemInfoDto infoDto, User owner, ItemRequest itemRequest) {
+        return Item.builder()
+                .id(infoDto.getId())
+                .name(infoDto.getName())
+                .description(infoDto.getDescription())
+                .available(infoDto.getAvailable())
+                .owner(owner)
+                .request(itemRequest)
+                .build();
     }
 
     public static Comment toComment(CommentShortDto commentShortDto, Item item, User user) {
-        return new Comment(
-                commentShortDto.getId(),
-                commentShortDto.getText(),
-                item,
-                user,
-                commentShortDto.getCreated()
-        );
+        return Comment.builder()
+                .id(commentShortDto.getId())
+                .text(commentShortDto.getText())
+                .item(item)
+                .author(user)
+                .created(commentShortDto.getCreated())
+                .build();
     }
 
     public static ItemDto toItemDto(Item item) {
-        return new ItemDto(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable()
-        );
+        return ItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .requestId(item.getRequest() != null ? item.getRequest().getId() : null)
+                .build();
     }
 
     public static CommentDto toCommentDto(Comment comment, User user) {
@@ -56,7 +71,7 @@ public class ItemMapper {
             Item item,
             Booking lastBooking,
             Booking nextBooking,
-            List<CommentDto> commentDtos) {
+            List<CommentDto> commentDtoRegister) {
         ItemInfoDto.BookingForItemDto lastBookingToAdd = null;
         ItemInfoDto.BookingForItemDto nextBookingToAdd = null;
 
@@ -78,14 +93,15 @@ public class ItemMapper {
             );
         }
 
-        return new ItemInfoDto(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                lastBookingToAdd,
-                nextBookingToAdd,
-                commentDtos
-        );
+        return ItemInfoDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .lastBooking(lastBookingToAdd)
+                .nextBooking(nextBookingToAdd)
+                .comments(commentDtoRegister)
+                .request(item.getRequest())
+                .build();
     }
 }

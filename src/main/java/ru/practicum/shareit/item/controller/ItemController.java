@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +11,8 @@ import ru.practicum.shareit.item.dto.ItemInfoDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.utility.marker.Create;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Slf4j
@@ -18,8 +20,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/items")
 public class ItemController {
-    private final ItemService itemService;
+
     public static final String HEADER_NAME_CONTAINS_OWNER_ID = "X-Sharer-User-Id";
+    private final ItemService itemService;
 
     // Добавление новой вещи
     @PostMapping
@@ -47,20 +50,28 @@ public class ItemController {
     public ItemInfoDto findItemById(
             @PathVariable Long itemId,
             @RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID, required = false) Long userId) {
+        log.info("Получение данных вещи с id={}", itemId);
         return itemService.findItemById(itemId, userId);
     }
 
     // Просмотр владельцем списка всех его вещей
     @GetMapping
     public List<ItemInfoDto> findAllUserItems(
-            @RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID, required = false) Long userId) {
-        return itemService.findAllUserItems(userId);
+            @RequestHeader(value = HEADER_NAME_CONTAINS_OWNER_ID, required = false) Long userId,
+            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
+        log.info("Просмотр владельцем списка всех его вещей");
+        return itemService.findAllUserItems(userId, from, size);
     }
 
     // Поиск вещи по имени или описанию
     @GetMapping("/search")
-    public List<ItemDto> findItemsByNameOrDescription(@RequestParam String text) {
-        return itemService.findItemsByNameOrDescription(text);
+    public List<ItemDto> findItemsByNameOrDescription(
+            @RequestParam String text,
+            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
+        log.info("Поиск вещи по тексту: {}", text);
+        return itemService.findItemsByNameOrDescription(text, from, size);
     }
 
     // Редактирование вещи

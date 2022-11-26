@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice("ru.practicum.shareit")
 public class ErrorHandler {
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleEntityAlreadyExistsException(final EntityAlreadyExistsException exception) {

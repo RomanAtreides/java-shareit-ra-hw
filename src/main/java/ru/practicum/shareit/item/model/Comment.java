@@ -6,6 +6,7 @@ import ru.practicum.shareit.user.model.User;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "comments")
 public class Comment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

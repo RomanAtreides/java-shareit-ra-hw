@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 public enum BookingStatus {
+
     ALL,        // Все бронирования
     FUTURE,     // Будущие
     CURRENT,    // Текущие
