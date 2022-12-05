@@ -18,20 +18,6 @@ public class BaseClient {
         this.rest = rest;
     }
 
-    private static ResponseEntity<Object> prepareGatewayResponse(ResponseEntity<Object> response) {
-        if (response.getStatusCode().is2xxSuccessful()) {
-            return response;
-        }
-
-        ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(response.getStatusCode());
-
-        if (response.hasBody()) {
-            return responseBuilder.body(response.getBody());
-        }
-
-        return responseBuilder.build();
-    }
-
     protected ResponseEntity<Object> get(String path) {
         return get(path, null, null);
     }
@@ -56,14 +42,6 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.POST, path, userId, parameters, body);
     }
 
-    protected <T> ResponseEntity<Object> put(String path, long userId, T body) {
-        return put(path, userId, null, body);
-    }
-
-    protected <T> ResponseEntity<Object> put(String path, long userId, @Nullable Map<String, Object> parameters, T body) {
-        return makeAndSendRequest(HttpMethod.PUT, path, userId, parameters, body);
-    }
-
     protected <T> ResponseEntity<Object> patch(String path, T body) {
         return patch(path, null, null, body);
     }
@@ -84,12 +62,22 @@ public class BaseClient {
         return delete(path, null, null);
     }
 
-    protected ResponseEntity<Object> delete(String path, long userId) {
-        return delete(path, userId, null);
-    }
-
     protected ResponseEntity<Object> delete(String path, Long userId, @Nullable Map<String, Object> parameters) {
         return makeAndSendRequest(HttpMethod.DELETE, path, userId, parameters, null);
+    }
+
+    private static ResponseEntity<Object> prepareGatewayResponse(ResponseEntity<Object> response) {
+        if (response.getStatusCode().is2xxSuccessful()) {
+            return response;
+        }
+
+        ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(response.getStatusCode());
+
+        if (response.hasBody()) {
+            return responseBuilder.body(response.getBody());
+        }
+
+        return responseBuilder.build();
     }
 
     private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, Long userId, @Nullable Map<String, Object> parameters, @Nullable T body) {
@@ -110,8 +98,10 @@ public class BaseClient {
 
     private HttpHeaders defaultHeaders(Long userId) {
         HttpHeaders headers = new HttpHeaders();
+
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+
         if (userId != null) {
             headers.set(HEADER_NAME_CONTAINS_OWNER_ID, String.valueOf(userId));
         }
